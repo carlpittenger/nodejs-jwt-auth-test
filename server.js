@@ -32,11 +32,11 @@ function main() {
     app.use((_request, res, next) => {
         res.setHeader(
             "Access-Control-Allow-Origin",
-            `http://localhost:${PORT}`
+            `http://localhost:${PORT}`,
         );
         res.setHeader(
             "Access-Control-Allow-Headers",
-            "Content-type,Authorization"
+            "Content-type,Authorization",
         );
 
         next();
