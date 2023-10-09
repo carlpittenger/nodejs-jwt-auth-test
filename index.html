@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"
+            integrity="sha512-emSwuKiMyYedRwflbZB2ghzX8Cw8fmNVgZ6yQNNXXagFzFOaQmbvQ1vmDkddHjm5AITcBIZfC7k4ShQSjgPAmQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <h1 class="row">Login</h1>
+
+            <main>
+                <div class="row">
+                    <label for="username">Username</label>
+                    <input type="text" name="username" id="username" />
+                </div>
+
+                <div class="row">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" />
+                </div>
+
+                <div>
+                    <button onclick="login()">Login</button>
+                    <button onclick="getDashboard()">Get Dashboard</button>
+                </div>
+            </main>
+        </div>
+
+        <script>
+            function login() {
+                const usernameInput = document.querySelector("#username");
+                if (usernameInput === null) {
+                    return;
+                }
+
+                const passwordInput = document.querySelector("#password");
+                if (passwordInput === null) {
+                    return;
+                }
+
+                const data = {
+                    username: usernameInput.value,
+                    password: passwordInput.value,
+                };
+
+                axios.post("/api/login", data).then((res) => {
+                    console.log(res);
+                    usernameInput.value = "";
+                    passwordInput.value = "";
+
+                    if (res && res.data && res.data.success) {
+                        const token = res.data.token;
+                        localStorage.setItem("jwt", token);
+                        getDashboard();
+                    }
+                });
+            }
+
+            function getDashboard() {
+                const token = localStorage.getItem("jwt");
+
+                const h1RowElement = document.querySelector("h1.row");
+                if (h1RowElement === null) {
+                    return;
+                }
+
+                const mainElement = document.querySelector("main");
+                if (mainElement === null) {
+                    return;
+                }
+
+                axios
+                    .get("/api/dashboard", {
+                        headers: { Authorization: `Bearer ${token}` },
+                    })
+                    .then((res) => {
+                        if (res && res.data && res.data.success) {
+                            h1RowElement.innerHTML = "Dashboard";
+                            mainElement.innerHTML = res.data.myContent;
+                        }
+                    });
+            }
+
+            function onLoad() {
+                const token = localStorage.getItem("jwt");
+                if (token !== null) {
+                    getDashboard();
+                }
+            }
+
+            onLoad();
+        </script>
+    </body>
+</html>
