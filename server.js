@@ -54,7 +54,7 @@ function main() {
         for (const user of users) {
             if (username === user.username && password === user.password) {
                 const token = sign({ id: user.id, username }, SECRET_KEY, {
-                    expiresIn: "7d",
+                    expiresIn: "3m",
                 });
                 res.json({ success: true, token, err: null });
                 return;
@@ -72,6 +72,14 @@ function main() {
         res.json({
             success: true,
             myContent: "Secret content that only logged in people can see.",
+        });
+    });
+
+    app.get("/api/settings", jwtMw, (_request, res) => {
+        res.json({
+            success: true,
+            myContent:
+                "Settings page content. This route is protected with JWT.",
         });
     });
 

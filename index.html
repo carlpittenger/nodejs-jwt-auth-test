@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -34,13 +34,18 @@
                 </div>
 
                 <div>
-                    <button onclick="login()">Login</button>
-                    <button onclick="getDashboard()">Get Dashboard</button>
+                    <button type="button" onclick="login()">Login</button>
+                    <button type="button" onclick="getDashboard()">
+                        Get Dashboard
+                    </button>
+                    <button type="button" onclick="getSettings()">
+                        Get Settings
+                    </button>
                 </div>
             </main>
         </div>
 
-        <script type="module">
+        <script>
             function login() {
                 const usernameInput = document.querySelector("#username");
                 if (usernameInput === null) {
@@ -73,26 +78,57 @@
             function getDashboard() {
                 const token = localStorage.getItem("jwt");
 
-                const h1RowElement = document.querySelector("h1.row");
-                if (h1RowElement === null) {
-                    return;
-                }
-
-                const mainElement = document.querySelector("main");
-                if (mainElement === null) {
-                    return;
-                }
-
                 axios
                     .get("/api/dashboard", {
                         headers: { Authorization: `Bearer ${token}` },
                     })
                     .then((res) => {
                         if (res && res.data && res.data.success) {
+                            const h1RowElement =
+                                document.querySelector("h1.row");
                             h1RowElement.innerHTML = "Dashboard";
+                            const mainElement = document.querySelector("main");
                             mainElement.innerHTML = res.data.myContent;
+                            updateURL("/dashboard");
+                        }
+                    })
+                    .catch((err) => {
+                        if (err.response.status === 401) {
+                            localStorage.removeItem("jwt");
+                            window.location.href = "/";
                         }
                     });
+            }
+
+            function getSettings() {
+                const token = localStorage.getItem("jwt");
+
+                axios
+                    .get("/api/settings", {
+                        headers: { Authorization: `Bearer ${token}` },
+                    })
+                    .then((res) => {
+                        if (res && res.data && res.data.success) {
+                            const h1RowElement =
+                                document.querySelector("h1.row");
+                            h1RowElement.innerHTML = "Settings";
+                            const mainElement = document.querySelector("main");
+                            mainElement.innerHTML = res.data.myContent;
+                            updateURL("/dashboard");
+                        }
+                    })
+                    .catch((err) => {
+                        if (err.response.status === 401) {
+                            // Handle JWT expiration: clear token and reload page
+                            localStorage.removeItem("jwt");
+                            window.location.href = "/"; // Redirect to the root address
+                        }
+                    });
+            }
+
+            // Use the HTML5 History API to update the URL
+            function updateURL(route) {
+                history.pushState(null, null, route);
             }
 
             function onLoad() {
